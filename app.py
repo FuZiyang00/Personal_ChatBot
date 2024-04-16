@@ -57,6 +57,9 @@ def main():
             user_question = st.chat_input(placeholder="Enter your question...")
             if user_question:
                 handle_user_input(user_question, st.session_state.conversation)
+        
+        #TODO: redirect to a new page after uploading the file: name of the chat is the file name
+        #TODO: vector storage: is it possible to check if the file is already uploaded and use the existing vector store?
 
 if __name__ == "__main__":
     main()
