@@ -1,5 +1,13 @@
 import streamlit as st
-from PyPDF2 import PdfReader
+from src.data_preprocessing import (
+    get_pdf_splits, get_text_splits, 
+    get_csv_splits, Vector_store)
+
+from langchain_openai import OpenAIEmbeddings
+from dotenv import load_dotenv
+from src.chatbot_utils import init_conversation_chain, handle_user_input
+
+load_dotenv()
 
 def main(): 
     "main function containing the main logic of the app"
@@ -15,20 +23,40 @@ def main():
     
         ''')
 
-    st.header("Chat with your own pdf document 💬")
+    st.header("Chat with your own documents 💬")
 
     # upload a PDF file
-    pdf = st.file_uploader("Upload your PDF", type='pdf')
- 
-    # st.write(pdf)
-    if pdf is not None:
-        pdf_reader = PdfReader(pdf)
+    file = st.file_uploader("Upload your file: supported file types .txt, .pdf, .csv")
+    # extract the file name and extension
+    if file is not None:
+        file_name = file.name
+        extension = file.type.split("/")[-1]
 
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-        
-        st.write(text[:-1])
+        uploaded_file = None
+        match extension:
+            case "pdf":
+                uploaded_file = get_pdf_splits(file)
+
+            case "txt":
+                uploaded_file = get_text_splits(file)
+
+            case "csv":
+                uploaded_file = get_csv_splits(file)
+    
+        if uploaded_file is not None:
+            embeddings_fn = OpenAIEmbeddings()
+            index_store = "./index_store.faiss"
+            vector_db = Vector_store(uploaded_file, embeddings_fn, index_store=index_store)
+            st.success("File uploaded successfully")
+
+            st.session_state.conversation = init_conversation_chain(vector_db)
+        else:
+            st.error("File not supported")
+    
+        if st.session_state.conversation:
+            user_question = st.chat_input(placeholder="Enter your question...")
+            if user_question:
+                handle_user_input(user_question, st.session_state.conversation)
 
 if __name__ == "__main__":
     main()
