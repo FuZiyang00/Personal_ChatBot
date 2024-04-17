@@ -1,7 +1,6 @@
 import streamlit as st
 from src.chatbot_utils import show_conversation_page, show_file_upload_page
 from dotenv import load_dotenv
-from src.chatbot_utils import init_conversation_chain, handle_user_input
 
 load_dotenv()
 
