@@ -1,1 +1,8 @@
-#ChatBot to provide help with the SAP ERP
+# Personal AI backed ChatBot 
+The application support the following file types: 
+- .pdf
+- .txt
+- .csv 
+
+
+
